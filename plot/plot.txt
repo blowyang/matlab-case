@@ -1,0 +1,17 @@
+clear; 
+clc;
+M=xlsread('Sample.xlsx');
+x = M(:,1); y = M(:,2); z = M(:,3);
+
+% 版本 >= MATLAB 2014b 
+shp=alphaShape(x,y,'HoleThreshold',1.5);
+tri = alphaTriangulation(shp);
+
+patch('faces',tri,'vertices',[x,y],... % 'facecolor' == 'interp' 时
+    'facevertexcdata',z,'edgecolor','none','facecolor','interp'); % 颜色
+
+% patch('faces',tri,'vertices',[x,y],... % 'facecolor' == 'flat' 时
+%     'facevertexcdata',mean(z(tri),2),'edgecolor','none','facecolor','flat'); % 颜色
+
+axis image
+colorbar EastOutside

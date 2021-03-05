@@ -1,0 +1,4 @@
+function [E_Matrix,F_Matrix,G_Matrix,N_Matrix]=Get_E_N_Matrix(N,lambda,gama1,gama2);
+A_Matrix=Get_A_Matrix(N,lambda,gama1,gama2);
+
+end

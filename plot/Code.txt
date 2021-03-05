@@ -1,0 +1,24 @@
+clc
+clear all
+
+M=xlsread('Sample.xlsx');
+
+x = M(,1);
+y = M(,2);
+z = M(,3);
+
+plot3(x,y,z,'.-')
+
+tri = delaunay(x,y);
+plot(x,y,'.')
+
+[r,c] = size(tri);
+disp(r)
+
+h = trisurf(tri, x, y, z);
+
+axis off
+shading interp
+colorbar EastOutside
+axis image
+view(0,90)

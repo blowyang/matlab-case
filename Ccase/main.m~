@@ -1,0 +1,78 @@
+
+R2=1e-3;
+VF=0.15;
+a=(pi/VF)^0.5*R2;
+G0=1250;
+gama1=0.1;
+G1=G0/gama1;
+gama2=0.1;
+G2=G1/gama2;
+R1=R2+0.001*R2;
+lambda=1/1.001;
+lambda1=R1/a ;
+
+N=10;
+M=10;
+K=8;
+[E_Matrix,F_Matrix,G_Matrix,N_Matrix]=Get_E_N_Matrix(N,lambda,gama1,gama2);
+B_Matrix=Get_B_Matrix(N,M,gama1,lambda1);
+
+C_Matrix=Get_C_Matrix(K,N,a,R1);
+D_Matrix=Get_D_Matrix(K,M,a);
+
+H_Matrix=Get_H_Matrix(D_Matrix,C_Matrix,N_Matrix,B_Matrix);
+
+P1=zeros(4*K,1);
+P2=zeros(4*K,1);
+
+for i=1:K
+    P1(i,1)=1;
+    P2(i+K,1)=1;
+end
+
+%Çódelt
+Xe1=((H_Matrix'*H_Matrix))\H_Matrix'*P1;
+Xe2=((H_Matrix'*H_Matrix))\H_Matrix'*P2;
+
+Xd1=-N_Matrix*B_Matrix*Xe1;
+Xd2=-N_Matrix*B_Matrix*Xe2;
+
+NP=40;
+del=a/NP;
+
+S1=zeros(N,2*N);
+S2=zeros(M,2*M);
+for n=1:N
+    S1(n,2*n-1)=1;
+    S1(n,2*n)=1i; 
+end
+for m=1:M
+    S2(m,2*m-1)=1;
+    S2(m,2*m)=1i; 
+end
+integral11=0;
+integral12=0;
+integral21=0;
+integral22=0;
+for np=1:NP
+    z_AB=del*np-a/2+a*1i/2;
+    z_DB=del*np*1i-a*1i/2+a/2;
+    L11=zeros(N,1);
+    L12=zeros(M,1);
+    L21=zeros(N,1);
+    L22=zeros(M,1);
+    for n=1:N
+        L11(n,1)=n*(R1/z_AB)^(n+1);
+        L21(n,1)=n*(R1/z_DB)^(n+1);
+    end
+    for m=1:M
+        L12(m,1)=Get_P_Diff(m,a,z_AB);
+        L22(m,1)=Get_P_Diff(m,a,z_DB);
+    end    
+    integral11=integral11+real(Xe2'*S2'*L12-1/R1*Xd2'*S1'*L11)*del;
+    integral12=integral12+real(Xe1'*S2'*L12-1/R1*Xd1'*S1'*L11)*del;
+    integral21=integral21+imag(Xe2'*S2'*L22-1/R1*Xd2'*S1'*L21)*del;
+    integral22=integral22+imag(Xe1'*S2'*L22-1/R1*Xd1'*S1'*L21)*del;
+end
+
+res=[integral11 integral12,integral21 integral22]\[0.1,0];
